@@ -6,24 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gemlik Escort | Armutlu'da Huzurlu ve Güvenilir Buluşmalar</title>
     <meta name="description" content="Armutlu'nun sakin atmosferinde, güvenilir ve kaliteli escort hizmeti. Özenle seçilmiş partnerlerimizle tanışmak için iletişime geçin.">
-        <meta name="keywords"
+    <meta name="keywords"
         content="Gemlik eskort, Gemlik escort bayan, Adliye eskort, Cihatlı escort bayan, Cumhuriyet eskort, Hamidiye escort, Büyükkumla eskort, Küçükkumla escort, Gemlik mahalle eskortları, Gemlik güvenilir eskort, Gemlik escort hizmetleri">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Gemlik Eskort">
-    <link rel="icon" type="image/png" href="/img/logo.png">
+    <link rel="icon" type="image/webp" href="/img/logo.webp">
     <link rel="canonical" href="https://www.bursaeskort-vip.vercel.app/gemlik">
     <meta property="og:title" content="Gemlik Eskort | Çekici Gemlik Escort Bayanlar ve Mahalle Bazlı Hizmetler">
     <meta property="og:description"
         content="Gemlik’te Adliye, Cihatlı, Cumhuriyet, Hamidiye, Büyükkumla ve daha fazla mahallede tutkulu escort bayanlarla unutulmaz anlar yaşayın. Güvenilir Gemlik eskort hizmetleri için doğru adres!">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.bursaeskort-vip.vercel.app/gemlik">
-    <meta property="og:image" content="https://www.bursaeskort-vip.vercel.app/img/logo.png">
+    <meta property="og:image" content="https://www.bursaeskort-vip.vercel.app/img/logo.webp">
     <meta property="og:site_name" content="Gemlik Eskort">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Gemlik Eskort | Çekici Gemlik Escort Bayanlar ve Mahalle Bazlı Hizmetler">
     <meta name="twitter:description"
         content="Gemlik’in Adliye, Cihatlı, Cumhuriyet, Hamidiye ve tüm mahallelerinde güvenilir eskort bayanlarla tanışın. Gemlik eskort hizmetleri için hemen iletişime geçin!">
-    <meta name="twitter:image" content="https://www.bursaeskort-vip.vercel.app/img/logo.png">
+    <meta name="twitter:image" content="https://www.bursaeskort-vip.vercel.app/img/logo.webp">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
     <script type="application/ld+json">
@@ -40,7 +40,7 @@
             "addressCountry": "TR"
         },
         "telephone": "+90 555 123 45 67",
-        "image": "https://www.bursaeskort-vip.vercel.app/img/logo.png",
+        "image": "https://www.bursaeskort-vip.vercel.app/img/logo.webp",
         "keywords": "Gemlik eskort, Gemlik escort bayan, Adliye eskort, Cihatlı escort, Cumhuriyet eskort, Hamidiye escort bayan, Büyükkumla eskort",
         "areaServed": [
             "Adliye",
@@ -272,7 +272,6 @@
         .card amp-img {
             width: 100%;
             height: 150px;
-            /* Resim boyutu büyütüldü (orijinal: 130px) */
             object-fit: cover;
             object-position: center;
         }
@@ -409,7 +408,7 @@
 
         .blog-card amp-img {
             width: 100%;
-            height: 600px;
+            height: 200px; /* Önceki: 600px */
             object-fit: cover;
             object-position: center;
             image-rendering: high-quality;
@@ -537,7 +536,6 @@
 
             .card amp-img {
                 height: 120px;
-                /* Resim boyutu büyütüldü (orijinal: 100px) */
             }
 
             .card h3 {
@@ -556,7 +554,7 @@
             .blog-card amp-img {
                 height: auto;
                 aspect-ratio: 5/4;
-                max-height: 350px;
+                max-height: 200px;
                 object-fit: contain;
             }
 
@@ -587,7 +585,6 @@
 
             .card amp-img {
                 height: 170px;
-                /* Resim boyutu büyütüldü (orijinal: 150px) */
             }
 
             .card h3 {
@@ -610,7 +607,7 @@
             }
 
             .blog-card amp-img {
-                height: 250px;
+                height: 200px;
             }
 
             .blog-info h3 {
@@ -640,7 +637,6 @@
 
             .card amp-img {
                 height: 190px;
-                /* Resim boyutu büyütüldü (orijinal: 170px) */
             }
 
             .card h3 {
@@ -664,7 +660,7 @@
             }
 
             .blog-card amp-img {
-                height: 300px;
+                height: 200px;
                 object-fit: cover;
             }
 
@@ -712,7 +708,7 @@
         </div>
         <div class="logo">
             <a class="deli" style="text-decoration: none; color: #f8f9fa;" href="/gemlik">
-                <amp-img src="/img/logo.png" alt="bursa Eskort Logo" width="30" height="30" layout="fixed"></amp-img>
+                <amp-img src="/img/logo.webp" alt="Bursa Eskort Logo" width="30" height="30" layout="fixed" loading="lazy"></amp-img>
                 <h1 style="font-size: 13px;">GEMLİK ESKORT</h1>
             </a>
         </div>
@@ -752,40 +748,34 @@
         </div>
     </amp-sidebar>
 
-
-    <!-- Main Content (İlan Kart Yeri) - Dokunulmadı -->
+    <!-- Main Content (İlan Kart Yeri) -->
     <div class="main-content">
-        <% districts.forEach(district=> { %>
-            <% if (district.isFilled) { %>
-                <div class="card filled" on="tap:AMP.navigateTo(url='/<%= currentDistrict %>/<%= district.order %>')"
-                    role="button" tabindex="0">
-                    <amp-img src="<%= district.img %>" alt="<%= district.name %> Gemlik Escort Bayan" width="300"
-                        height="200" layout="responsive"></amp-img>
-                    <div class="info">
-                        <h3>
-                            <%= district.name %>
-                        </h3>
-                        <p>
-                            <%= district.age %>
-                        </p>
-                        <p>
-                            <%= district.number %>
-                        </p>
-                    </div>
-                </div>
-                <% } else { %>
-                    <div class="card">
-                        <amp-img src="<%= district.img %>" alt="<%= district.name %> Gemlik Escort Hizmeti" width="300"
-                            height="200" layout="responsive"></amp-img>
-                        <div class="info">
-                            <h3><a href="https://t.me/jordiphp" target="_blank">
-                                    <%= district.name %>
-                                </a></h3>
-                        </div>
-                    </div>
+        <% districts.forEach(district => { %>
+            <div class="card <%= district.isFilled ? 'filled' : '' %>"
+                 <%= district.isFilled ? `on="tap:AMP.navigateTo(url='/${currentDistrict}/${district.order}')"` : '' %>
+                 role="button" tabindex="0">
+                <amp-img
+                    src="<%= district.img.replace('.jpg', '-300.webp') %>"
+                    srcset="<%= district.img.replace('.jpg', '-300.webp') %> 300w, <%= district.img.replace('.jpg', '-600.webp') %> 600w"
+                    alt="<%= district.name %> Gemlik Escort"
+                    width="300"
+                    height="200"
+                    layout="responsive"
+                    loading="lazy"
+                ></amp-img>
+                <div class="info">
+                    <h3><%= district.name %></h3>
+                    <% if (district.isFilled) { %>
+                        <p><%= district.age %></p>
+                        <p><%= district.number %></p>
+                    <% } else { %>
+                        <p><a href="https://t.me/jordiphp" target="_blank">İletişime Geç</a></p>
                     <% } %>
-                        <% }) %>
+                </div>
+            </div>
+        <% }) %>
     </div>
+
     <!-- Main Content Öncesi SEO İçeriği -->
     <div class="seo-content" aria-label="Gemlik eskort hizmetleri hakkında bilgi">
         <h2>Gemlik Eskort ile Unutulmaz Anlar Yaşayın</h2>
@@ -850,8 +840,15 @@
 
         <div class="blog-content">
             <div class="blog-card">
-                <amp-img src="img/derya.jpg" alt="Gemlik Escort Bayan Derya ile Tutkulu Buluşmalar" width="300"
-                    height="200" layout="responsive"></amp-img>
+                <amp-img
+                    src="/img/derya-300.webp"
+                    srcset="/img/derya-300.webp 300w, /img/derya-600.webp 600w"
+                    alt="Gemlik Escort Bayan Derya ile Tutkulu Buluşmalar"
+                    width="300"
+                    height="200"
+                    layout="responsive"
+                    loading="lazy"
+                ></amp-img>
                 <div class="blog-info">
                     <h3>Tutkulu Gemlik Escort Derya Sizleri Bekliyor</h3>
                     <p>Merhaba, ben Derya. 34 yaşında, 1.63 boyunda, kızıl saçlarım ve masmavi gözlerimle Gemlik’in en
@@ -862,8 +859,15 @@
                 </div>
             </div>
             <div class="blog-card">
-                <amp-img src="img/hilal.jpg" alt="Gemlik Escort Bayan Hilal ile Enerjik Deneyimler" width="300"
-                    height="200" layout="responsive"></amp-img>
+                <amp-img
+                    src="/img/hilal-300.webp"
+                    srcset="/img/hilal-300.webp 300w, /img/hilal-600.webp 600w"
+                    alt="Gemlik Escort Bayan Hilal ile Enerjik Deneyimler"
+                    width="300"
+                    height="200"
+                    layout="responsive"
+                    loading="lazy"
+                ></amp-img>
                 <div class="blog-info">
                     <h3>Gemlik Escort Hilal ile Tanışmaya Hazır mısınız?</h3>
                     <p>Ben Hilal, Gemlik’in en çekici ve tutkulu escort bayanlarından biriyim. Adliye eskort ya da
@@ -873,8 +877,15 @@
                 </div>
             </div>
             <div class="blog-card">
-                <amp-img src="img/beste.jpg" alt="Anal Yapan Gemlik Escort Bayan Beste" width="300" height="200"
-                    layout="responsive"></amp-img>
+                <amp-img
+                    src="/img/beste-300.webp"
+                    srcset="/img/beste-300.webp 300w, /img/beste-600.webp 600w"
+                    alt="Anal Yapan Gemlik Escort Bayan Beste"
+                    width="300"
+                    height="200"
+                    layout="responsive"
+                    loading="lazy"
+                ></amp-img>
                 <div class="blog-info">
                     <h3>Anal Yapan Gemlik Escort Bayan Beste</h3>
                     <p>Merhaba, ben Beste. Anal yapan Gemlik escort arıyorsanız doğru adrestesiniz! Cumhuriyet eskort ya
@@ -884,8 +895,15 @@
                 </div>
             </div>
             <div class="blog-card">
-                <amp-img src="img/suzan.jpg" alt="Eve Gelen Gemlik Escort Bayan Suzan" width="300" height="200"
-                    layout="responsive"></amp-img>
+                <amp-img
+                    src="/img/suzan-300.webp"
+                    srcset="/img/suzan-300.webp 300w, /img/suzan-600.webp 600w"
+                    alt="Eve Gelen Gemlik Escort Bayan Suzan"
+                    width="300"
+                    height="200"
+                    layout="responsive"
+                    loading="lazy"
+                ></amp-img>
                 <div class="blog-info">
                     <h3>Gemlik Escort Eve Gelen Suzan’ı Tanıyın</h3>
                     <p>Selam, ben Suzan. Eve gelen Gemlik escort bayan olarak Narlı, Hisar ya da Umurbey mahallelerinde
@@ -907,6 +925,7 @@
                 katın!</p>
         </div>
     </div>
+
     <footer>
         <div class="footer-content">
             <div class="footer-section">
@@ -957,8 +976,6 @@
             </p>
         </div>
     </footer>
-
-
 </body>
 
 </html>
