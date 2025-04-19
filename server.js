@@ -5,64 +5,8 @@ const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
 const fs = require("fs").promises;
-const os = require("os");
 
 const app = express();
-
-// In-memory database
-let db = {
-  admins: [
-    {
-      id: 1,
-      username: "admin",
-      password: "ea85245f3a4bcb5fb37119f948f5aeb422fb42a5d0f6536a1182fb66768b436dd4cc34a33c34b9f61a64f0869f05ee70f0177e1449b2f4d39ada9efefdeb6948",
-      full_name: "jordi reis",
-      last_login: "2025-04-17T15:41:45.720Z"
-    }
-  ],
-  districts: {
-    buyukorhan: [
-      {
-        baslik: "merve",
-        telefon_no: "05565656262",
-        kapak_resim: "/img/1744904566063-8023207.png",
-        adres: "görükle",
-        normal_resimler: "/img/1744904566070-556841594.png",
-        aciklama: "ben seni seviyorum",
-        yas: "18",
-        sayfa_sira_no: 5,
-        ilce_adi: "buyukorhan"
-      },
-      {
-        baslik: "buse",
-        telefon_no: "+90546 589 7845",
-        kapak_resim: "/img/1744905512616-153774461.jpg",
-        adres: "büyük orhan ",
-        normal_resimler: "/img/1744905512618-539044872.jpg,/img/1744905512620-453583462.jpg,/img/1744905512621-53997628.jpg,/img/1744905512622-163553752.jpg,/img/1744905512623-991535646.jpg",
-        aciklama: "ali bana ",
-        yas: "24",
-        sayfa_sira_no: 2,
-        ilce_adi: "buyukorhan"
-      }
-    ],
-    gemlik: [],
-    gursu: [],
-    harmancik: [],
-    inegol: [],
-    iznik: [],
-    karacabey: [],
-    keles: [],
-    kestel: [],
-    mudanya: [],
-    mustafakemalpasa: [],
-    nilufer: [],
-    orhaneli: [],
-    orhangazi: [],
-    osmangazi: [],
-    yenisehir: [],
-    yildirim: []
-  }
-};
 
 // Middleware ayarları
 app.use(cors());
@@ -81,29 +25,44 @@ app.use(
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// JSON dosyası ayarları
+const dbPath = path.join(__dirname, "data", "database.json");
+
+// JSON dosyasını okuma
+async function readDB() {
+  try {
+    const data = await fs.readFile(dbPath, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Dosya okuma hatası:", error);
+    return { admins: [], districts: {} };
+  }
+}
+
+// JSON dosyasına yazma
+async function writeDB(data) {
+  try {
+    await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error("Dosya yazma hatası:", error);
+  }
+}
+
 // SHA512 şifreleme fonksiyonu
 function sha512(password) {
   return crypto.createHash("sha512").update(password).digest("hex");
 }
 
-// Multer ayarları (Vercel uyumlu)
+// Multer ayarları
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const destPath = process.env.NODE_ENV === 'production'
-      ? path.join(os.tmpdir(), "img")
-      : path.join(__dirname, "views", "img");
-    
-    // Dizin yoksa oluştur
-    fs.mkdir(destPath, { recursive: true })
-      .then(() => cb(null, destPath))
-      .catch(err => cb(err));
+    cb(null, path.join(__dirname, "views", "img"));
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -134,6 +93,7 @@ app.post("/login", async (req, res) => {
   }
 
   const hashedPassword = sha512(password);
+  const db = await readDB();
   const admin = db.admins.find(
     (a) => a.username === username && a.password === hashedPassword
   );
@@ -141,7 +101,7 @@ app.post("/login", async (req, res) => {
   if (admin) {
     // Son giriş zamanını güncelle
     admin.last_login = new Date().toISOString();
-    // No need to write to file, as data is in memory
+    await writeDB(db);
 
     // Doğru girişte admin-index sayfasına yönlendir
     return res.redirect("/admin-index");
@@ -196,6 +156,7 @@ const districts = [
 // İlçe listesi route'u oluşturma
 const createDistrictListRoute = (districtName) => {
   app.get(`/${districtName}`, async (req, res) => {
+    const db = await readDB();
     const districtData = db.districts[districtName] || [];
 
     const maxSlots = 50;
@@ -237,6 +198,7 @@ const createDistrictListRoute = (districtName) => {
 const createDistrictDetailRoute = (districtName) => {
   app.get(`/${districtName}/:id`, async (req, res) => {
     const id = parseInt(req.params.id);
+    const db = await readDB();
     const districtData = db.districts[districtName] || [];
     const defaultImage = "/img/default.jpg";
 
@@ -354,6 +316,7 @@ app.post(
           .join(",")
       : null;
 
+    const db = await readDB();
     if (!db.districts[district]) db.districts[district] = [];
 
     // Aynı sayfa_sira_no ile başka bir kayıt varsa hata döndür
@@ -379,6 +342,7 @@ app.post(
       ilce_adi: ilce_adi || district,
     });
 
+    await writeDB(db);
     res.redirect("/admin-index?success=İlan başarıyla eklendi");
   }
 );
@@ -387,6 +351,7 @@ app.post(
 app.get("/admin/list-districts", async (req, res) => {
   const { district } = req.query;
   const selectedDistrict = district || "buyukorhan";
+  const db = await readDB();
   const listings = db.districts[selectedDistrict] || [];
 
   res.render("list-districts", {
@@ -401,6 +366,7 @@ app.get("/admin/list-districts", async (req, res) => {
 // 4. İlan Güncelleme Sayfası
 app.get("/admin/edit-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
+  const db = await readDB();
   const listing = db.districts[district]?.find(
     (item) => item.sayfa_sira_no === parseInt(id)
   );
@@ -445,6 +411,7 @@ app.post(
           .join(",")
       : req.body.existing_normal_resimler;
 
+    const db = await readDB();
     const listingIndex = db.districts[district]?.findIndex(
       (item) => item.sayfa_sira_no === parseInt(id)
     );
@@ -479,6 +446,7 @@ app.post(
       ilce_adi: ilce_adi || district,
     };
 
+    await writeDB(db);
     res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi");
   }
 );
@@ -486,6 +454,7 @@ app.post(
 // 6. İlan Silme
 app.post("/admin/delete-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
+  const db = await readDB();
 
   if (!db.districts[district]) {
     return res.redirect("/admin/list-districts?error=İlan bulunamadı");
@@ -495,6 +464,7 @@ app.post("/admin/delete-district/:district/:id", async (req, res) => {
     (item) => item.sayfa_sira_no !== parseInt(id)
   );
 
+  await writeDB(db);
   res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
 });
 
