@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const session = require("express-session");
 const crypto = require("crypto");
 const multer = require("multer");
 const fs = require("fs").promises;
@@ -13,17 +12,6 @@ const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
 
 // Static dosya sunucusu
 app.use(
@@ -63,14 +51,6 @@ async function writeDB(data) {
 // SHA512 şifreleme fonksiyonu
 function sha512(password) {
   return crypto.createHash("sha512").update(password).digest("hex");
-}
-
-// Auth middleware
-function requireAuth(req, res, next) {
-  if (req.session.user) {
-    return next();
-  }
-  res.redirect("/jordi");
 }
 
 // Multer ayarları
@@ -119,41 +99,22 @@ app.post("/login", async (req, res) => {
   );
 
   if (admin) {
-    req.session.user = {
-      id: admin.id,
-      username: admin.username,
-      full_name: admin.full_name,
-    };
-
     // Son giriş zamanını güncelle
     admin.last_login = new Date().toISOString();
     await writeDB(db);
 
-    res.redirect("/admin-index");
+    // Doğru girişte admin-index sayfasına yönlendir
+    return res.redirect("/admin-index");
   } else {
-    res.render("admin-login", {
+    return res.render("admin-login", {
       error: "Kullanıcı adı veya şifre hatalı",
     });
   }
 });
 
-// Logout işlemi
-app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Logout hatası:", err);
-      return res.status(500).render("error", {
-        message: "Çıkış yapılamadı",
-      });
-    }
-    res.redirect("/jordi");
-  });
-});
-
 // Admin paneli ana sayfası
-app.get("/admin-index", requireAuth, (req, res) => {
+app.get("/admin-index", (req, res) => {
   res.render("admin-index", {
-    user: req.session.user,
     success: req.query.success || null,
     error: req.query.error || null,
   });
@@ -161,9 +122,6 @@ app.get("/admin-index", requireAuth, (req, res) => {
 
 // Admin giriş sayfası
 app.get("/jordi", (req, res) => {
-  if (req.session.user) {
-    return res.redirect("/admin-index");
-  }
   res.render("admin-login", { error: null });
 });
 
@@ -313,13 +271,11 @@ app.get("/sitemap", (req, res) => {
   res.render("sitemap", { error: null });
 });
 
-
 // Admin paneli için ilan yönetimi
 
 // 1. İlan Ekleme Sayfası
-app.get("/admin/add-district", requireAuth, (req, res) => {
+app.get("/admin/add-district", (req, res) => {
   res.render("add-district", {
-    user: req.session.user,
     districts,
     error: null,
   });
@@ -328,7 +284,6 @@ app.get("/admin/add-district", requireAuth, (req, res) => {
 // 2. İlan Ekleme İşlemi
 app.post(
   "/admin/add-district",
-  requireAuth,
   upload.fields([
     { name: "kapak_resim", maxCount: 1 },
     { name: "normal_resimler", maxCount: 5 },
@@ -347,7 +302,6 @@ app.post(
 
     if (!district || !baslik || !telefon_no || !sayfa_sira_no) {
       return res.render("add-district", {
-        user: req.session.user,
         districts,
         error: "Zorunlu alanlar eksik",
       });
@@ -371,7 +325,6 @@ app.post(
     );
     if (existing) {
       return res.render("add-district", {
-        user: req.session.user,
         districts,
         error: "Bu sıra numarası zaten kullanılıyor",
       });
@@ -395,14 +348,13 @@ app.post(
 );
 
 // 3. İlan Listeleme
-app.get("/admin/list-districts", requireAuth, async (req, res) => {
+app.get("/admin/list-districts", async (req, res) => {
   const { district } = req.query;
   const selectedDistrict = district || "buyukorhan";
   const db = await readDB();
   const listings = db.districts[selectedDistrict] || [];
 
   res.render("list-districts", {
-    user: req.session.user,
     districts,
     listings,
     currentDistrict: selectedDistrict,
@@ -412,7 +364,7 @@ app.get("/admin/list-districts", requireAuth, async (req, res) => {
 });
 
 // 4. İlan Güncelleme Sayfası
-app.get("/admin/edit-district/:district/:id", requireAuth, async (req, res) => {
+app.get("/admin/edit-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
   const db = await readDB();
   const listing = db.districts[district]?.find(
@@ -424,7 +376,6 @@ app.get("/admin/edit-district/:district/:id", requireAuth, async (req, res) => {
   }
 
   res.render("edit-district", {
-    user: req.session.user,
     districts,
     listing,
     currentDistrict: district,
@@ -435,7 +386,6 @@ app.get("/admin/edit-district/:district/:id", requireAuth, async (req, res) => {
 // 5. İlan Güncelleme İşlemi
 app.post(
   "/admin/edit-district/:district/:id",
-  requireAuth,
   upload.fields([
     { name: "kapak_resim", maxCount: 1 },
     { name: "normal_resimler", maxCount: 5 },
@@ -502,7 +452,7 @@ app.post(
 );
 
 // 6. İlan Silme
-app.post("/admin/delete-district/:district/:id", requireAuth, async (req, res) => {
+app.post("/admin/delete-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
   const db = await readDB();
 
