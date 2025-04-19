@@ -3,47 +3,80 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const crypto = require("crypto");
+const multer = require("multer");
+const fs = require("fs").promises;
+const { put } = require("@vercel/blob");
 
 const app = express();
 
+// Middleware ayarları
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(
-  "/img",
-  express.static(path.join(__dirname, "views", "img"), {
-    fallthrough: true,
-  })
-);
-
+// EJS ayarları
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-let db = { admins: [], districts: {} };
+// JSON dosyası ayarları
+const dbPath = process.env.NODE_ENV === "production" ? path.join("/tmp", "database.json") : path.join(__dirname, "data", "database.json");
+const staticDbPath = path.join(__dirname, "data", "database.json"); // Read-only source for initial data
 
+// JSON dosyasını okuma
 async function readDB() {
   try {
-    return db;
+    // Try reading from /tmp/database.json first
+    let data;
+    try {
+      data = await fs.readFile(dbPath, "utf8");
+    } catch (tmpError) {
+      // If /tmp/database.json doesn't exist, fall back to static data/database.json
+      data = await fs.readFile(staticDbPath, "utf8");
+    }
+    return JSON.parse(data);
   } catch (error) {
-    console.error("Veri okuma hatası:", error);
+    console.error("Dosya okuma hatası:", error);
     return { admins: [], districts: {} };
   }
 }
 
+// JSON dosyasına yazma (sadece /tmp'ye yazar, kalıcı değil)
 async function writeDB(data) {
   try {
-    db = data;
-    console.log("Bellek içi veritabanı güncellendi");
+    await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+    console.warn("Warning: Changes written to /tmp/database.json are temporary and will not persist on Vercel.");
   } catch (error) {
-    console.error("Veri yazma hatası:", error);
+    console.error("Dosya yazma hatası:", error);
   }
 }
 
+// SHA512 şifreleme fonksiyonu
 function sha512(password) {
   return crypto.createHash("sha512").update(password).digest("hex");
 }
 
+// Multer ayarları (dosyaları bellekte tutar, Vercel Blob'a yüklenir)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (!file || !file.originalname) {
+      return cb(new Error("Dosya adı eksik veya geçersiz"));
+    }
+    const filetypes = /jpeg|jpg|png/;
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+    const mimetype = filetypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error("Sadece JPEG veya PNG dosyaları yüklenebilir"));
+  },
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// Login işlemi
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -60,8 +93,11 @@ app.post("/login", async (req, res) => {
   );
 
   if (admin) {
+    // Son giriş zamanını güncelle
     admin.last_login = new Date().toISOString();
     await writeDB(db);
+
+    // Doğru girişte admin-index sayfasına yönlendir
     return res.redirect("/admin-index");
   } else {
     return res.render("admin-login", {
@@ -70,6 +106,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Admin paneli ana sayfası
 app.get("/admin-index", (req, res) => {
   res.render("admin-index", {
     success: req.query.success || null,
@@ -77,16 +114,19 @@ app.get("/admin-index", (req, res) => {
   });
 });
 
+// Admin giriş sayfası
 app.get("/jordi", (req, res) => {
   res.render("admin-login", { error: null });
 });
 
+// Basit route'lar için fonksiyon
 const createSimpleRoute = (routeName) => {
   app.get(`/${routeName}`, (req, res) => {
     res.render(routeName, { error: null });
   });
 };
 
+// Tüm basit sayfalar
 const simplePages = [
   "lumila", "bahar", "leyla", "burcu", "gozde", "ilayda", "fatma",
   "hatice", "derya", "hilal", "beste", "suzan", "cansu", "eda",
@@ -100,12 +140,14 @@ const simplePages = [
 
 simplePages.forEach((page) => createSimpleRoute(page));
 
+// Tüm ilçeler
 const districts = [
   "buyukorhan", "gemlik", "gursu", "harmancik", "inegol", "iznik", "karacabey",
   "keles", "kestel", "mudanya", "mustafakemalpasa", "nilufer", "orhaneli",
   "orhangazi", "osmangazi", "yenisehir", "yildirim",
 ];
 
+// İlçe listesi route'u oluşturma
 const createDistrictListRoute = (districtName) => {
   app.get(`/${districtName}`, async (req, res) => {
     const db = await readDB();
@@ -113,7 +155,7 @@ const createDistrictListRoute = (districtName) => {
 
     const maxSlots = 50;
     const districtsList = [];
-    const defaultImage = "/img/default.jpg";
+    const defaultImage = "https://via.placeholder.com/150"; // Varsayılan resim URL'si
 
     for (let i = 1; i <= maxSlots; i++) {
       const district = districtData.find((row) => row.sayfa_sira_no === i);
@@ -146,12 +188,13 @@ const createDistrictListRoute = (districtName) => {
   });
 };
 
+// İlçe detay route'u oluşturma
 const createDistrictDetailRoute = (districtName) => {
   app.get(`/${districtName}/:id`, async (req, res) => {
     const id = parseInt(req.params.id);
     const db = await readDB();
     const districtData = db.districts[districtName] || [];
-    const defaultImage = "/img/default.jpg";
+    const defaultImage = "https://via.placeholder.com/150";
 
     const district = districtData.find((row) => row.sayfa_sira_no === id);
     let districtDetail;
@@ -186,6 +229,7 @@ const createDistrictDetailRoute = (districtName) => {
       };
     }
 
+    // Rastgele öneriler
     const suggestions = districtData
       .filter((row) => row.sayfa_sira_no !== id)
       .sort(() => Math.random() - 0.5)
@@ -213,14 +257,17 @@ districts.forEach((district) => {
   createDistrictDetailRoute(district);
 });
 
+// Ana sayfa
 app.get("/", (req, res) => {
   res.render("index", { error: null });
 });
-
 app.get("/sitemap", (req, res) => {
   res.render("sitemap", { error: null });
 });
 
+// Admin paneli için ilan yönetimi
+
+// 1. İlan Ekleme Sayfası
 app.get("/admin/add-district", (req, res) => {
   res.render("add-district", {
     districts,
@@ -228,54 +275,86 @@ app.get("/admin/add-district", (req, res) => {
   });
 });
 
-app.post("/admin/add-district", async (req, res) => {
-  const {
-    district,
-    baslik,
-    telefon_no,
-    adres,
-    aciklama,
-    yas,
-    sayfa_sira_no,
-    ilce_adi,
-  } = req.body;
+// 2. İlan Ekleme İşlemi
+app.post(
+  "/admin/add-district",
+  upload.fields([
+    { name: "kapak_resim", maxCount: 1 },
+    { name: "normal_resimler", maxCount: 5 },
+  ]),
+  async (req, res) => {
+    const {
+      district,
+      baslik,
+      telefon_no,
+      adres,
+      aciklama,
+      yas,
+      sayfa_sira_no,
+      ilce_adi,
+    } = req.body;
 
-  if (!district || !baslik || !telefon_no || !sayfa_sira_no) {
-    return res.render("add-district", {
-      districts,
-      error: "Zorunlu alanlar eksik",
+    if (!district || !baslik || !telefon_no || !sayfa_sira_no) {
+      return res.render("add-district", {
+        districts,
+        error: "Zorunlu alanlar eksik",
+      });
+    }
+
+    let kapakResim = null;
+    if (req.files["kapak_resim"]) {
+      const file = req.files["kapak_resim"][0];
+      const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
+        access: "public",
+      });
+      kapakResim = blob.url;
+    }
+
+    let normalResimler = null;
+    if (req.files["normal_resimler"]) {
+      const urls = await Promise.all(
+        req.files["normal_resimler"].map(async (file) => {
+          const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
+            access: "public",
+          });
+          return blob.url;
+        })
+      );
+      normalResimler = urls.join(",");
+    }
+
+    const db = await readDB();
+    if (!db.districts[district]) db.districts[district] = [];
+
+    // Aynı sayfa_sira_no ile başka bir kayıt varsa hata döndür
+    const existing = db.districts[district].find(
+      (item) => item.sayfa_sira_no === parseInt(sayfa_sira_no)
+    );
+    if (existing) {
+      return res.render("add-district", {
+        districts,
+        error: "Bu sıra numarası zaten kullanılıyor",
+      });
+    }
+
+    db.districts[district].push({
+      baslik,
+      telefon_no,
+      kapak_resim: kapakResim,
+      adres,
+      normal_resimler: normalResimler,
+      aciklama,
+      yas,
+      sayfa_sira_no: parseInt(sayfa_sira_no),
+      ilce_adi: ilce_adi || district,
     });
+
+    await writeDB(db);
+    res.redirect("/admin-index?success=İlan başarıyla eklendi (Geçici olarak kaydedildi, kalıcı olması için data/database.json dosyasını güncelleyin ve yeniden deploy edin)");
   }
+);
 
-  const db = await readDB();
-  if (!db.districts[district]) db.districts[district] = [];
-
-  const existing = db.districts[district].find(
-    (item) => parseInt(item.sayfa_sira_no) === parseInt(sayfa_sira_no)
-  );
-  if (existing) {
-    return res.render("add-district", {
-      districts,
-      error: "Bu sıra numarası zaten kullanılıyor",
-    });
-  }
-
-  db.districts[district].push({
-    baslik,
-    telefon_no,
-    kapak_resim: null,
-    adres,
-    normal_resimler: null,
-    aciklama,
-    yas,
-    sayfa_sira_no: parseInt(sayfa_sira_no),
-    ilce_adi: ilce_adi || district,
-  });
-
-  await writeDB(db);
-  res.redirect("/admin-index?success=İlan başarıyla eklendi");
-});
-
+// 3. İlan Listeleme
 app.get("/admin/list-districts", async (req, res) => {
   const { district } = req.query;
   const selectedDistrict = district || "buyukorhan";
@@ -291,11 +370,12 @@ app.get("/admin/list-districts", async (req, res) => {
   });
 });
 
+// 4. İlan Güncelleme Sayfası
 app.get("/admin/edit-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
   const db = await readDB();
   const listing = db.districts[district]?.find(
-    (item) => parseInt(item.sayfa_sira_no) === parseInt(id)
+    (item) => item.sayfa_sira_no === parseInt(id)
   );
 
   if (!listing) {
@@ -310,56 +390,88 @@ app.get("/admin/edit-district/:district/:id", async (req, res) => {
   });
 });
 
-app.post("/admin/edit-district/:district/:id", async (req, res) => {
-  const { district, id } = req.params;
-  const {
-    baslik,
-    telefon_no,
-    adres,
-    aciklama,
-    yas,
-    sayfa_sira_no,
-    ilce_adi,
-  } = req.body;
+// 5. İlan Güncelleme İşlemi
+app.post(
+  "/admin/edit-district/:district/:id",
+  upload.fields([
+    { name: "kapak_resim", maxCount: 1 },
+    { name: "normal_resimler", maxCount: 5 },
+  ]),
+  async (req, res) => {
+    const { district, id } = req.params;
+    const {
+      baslik,
+      telefon_no,
+      adres,
+      aciklama,
+      yas,
+      sayfa_sira_no,
+      ilce_adi,
+    } = req.body;
 
-  const db = await readDB();
-  const listingIndex = db.districts[district]?.findIndex(
-    (item) => parseInt(item.sayfa_sira_no) === parseInt(id)
-  );
+    let kapakResim = req.body.existing_kapak_resim;
+    if (req.files["kapak_resim"]) {
+      const file = req.files["kapak_resim"][0];
+      const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
+        access: "public",
+      });
+      kapakResim = blob.url;
+    }
 
-  if (listingIndex === -1) {
-    return res.redirect(
-      `/admin/edit-district/${district}/${id}?error=İlan bulunamadı`
+    let normalResimler = req.body.existing_normal_resimler;
+    if (req.files["normal_resimler"]) {
+      const urls = await Promise.all(
+        req.files["normal_resimler"].map(async (file) => {
+          const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
+            access: "public",
+          });
+          return blob.url;
+        })
+      );
+      normalResimler = urls.join(",");
+    }
+
+    const db = await readDB();
+    const listingIndex = db.districts[district]?.findIndex(
+      (item) => item.sayfa_sira_no === parseInt(id)
     );
+
+    if (listingIndex === -1) {
+      return res.redirect(
+        `/admin/edit-district/${district}/${id}?error=İlan bulunamadı`
+      );
+    }
+
+    // Aynı sayfa_sira_no başka bir kayıtla çakışıyorsa hata
+    if (
+      parseInt(sayfa_sira_no) !== parseInt(id) &&
+      db.districts[district].some(
+        (item) => item.sayfa_sira_no === parseInt(sayfa_sira_no)
+      )
+    ) {
+      return res.redirect(
+        `/admin/edit-district/${district}/${id}?error=Bu sıra numarası zaten kullanılıyor`
+      );
+    }
+
+    db.districts[district][listingIndex] = {
+      baslik,
+      telefon_no,
+      kapak_resim: kapakResim,
+      adres,
+      normal_resimler: normalResimler,
+      aciklama,
+      yas,
+      sayfa_sira_no: parseInt(sayfa_sira_no),
+      ilce_adi: ilce_adi || district,
+    };
+
+    await writeDB(db);
+    res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi (Geçici olarak kaydedildi, kalıcı olması için data/database.json dosyasını güncelleyin ve yeniden deploy edin)");
   }
+);
 
-  if (
-    parseInt(sayfa_sira_no) !== parseInt(id) &&
-    db.districts[district].some(
-      (item) => parseInt(item.sayfa_sira_no) === parseInt(sayfa_sira_no)
-    )
-  ) {
-    return res.redirect(
-      `/admin/edit-district/${district}/${id}?error=Bu sıra numarası zaten kullanılıyor`
-    );
-  }
-
-  db.districts[district][listingIndex] = {
-    baslik,
-    telefon_no,
-    kapak_resim: db.districts[district][listingIndex].kapak_resim,
-    adres,
-    normal_resimler: db.districts[district][listingIndex].normal_resimler,
-    aciklama,
-    yas,
-    sayfa_sira_no: parseInt(sayfa_sira_no),
-    ilce_adi: ilce_adi || district,
-  };
-
-  await writeDB(db);
-  res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi");
-});
-
+// 6. İlan Silme
 app.post("/admin/delete-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
   const db = await readDB();
@@ -369,13 +481,14 @@ app.post("/admin/delete-district/:district/:id", async (req, res) => {
   }
 
   db.districts[district] = db.districts[district].filter(
-    (item) => parseInt(item.sayfa_sira_no) !== parseInt(id)
+    (item) => item.sayfa_sira_no !== parseInt(id)
   );
 
   await writeDB(db);
-  res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
+  res.redirect("/admin/list-districts?success=İlan başarıyla silindi (Geçici olarak kaydedildi, kalıcı olması için data/database.json dosyasını güncelleyin ve yeniden deploy edin)");
 });
 
+// 404 Hata Yönlendirmesi
 app.use((req, res, next) => {
   res.status(404).render("404", {
     error: "Sayfa Bulunamadı",
@@ -383,6 +496,7 @@ app.use((req, res, next) => {
   });
 });
 
+// Hata yönetimi
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).render("error", {
