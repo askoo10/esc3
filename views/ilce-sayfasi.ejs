@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+</head>
+<body>
+  <h1>Bursa <%= ilceAdi %> Escort</h1>
+  <h2>Mahalleler:</h2>
+  <ul>
+    <% mahalleler.forEach(mahalle => { %>
+      <li><a href="/<%= ilceAdi.toLowerCase() %>/<%= mahalle %>"><%= mahalle %></a></li>
+    <% }); %>
+  </ul>
+</body>
+</html>

@@ -1,0 +1,39 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /wp-admin/
+Disallow: /private/
+Disallow: /ajax/
+Disallow: /search/
+Disallow: /?s=
+Disallow: *?filter=
+Disallow: *?sort=
+
+Allow: /osmangazi/
+Allow: /nilufer/
+Allow: /yildirim/
+Allow: /buyukorhan/
+Allow: /gemlik/
+Allow: /gursu/
+Allow: /harmancik/
+Allow: /inegol/
+Allow: /iznik/
+Allow: /karacabey/
+Allow: /keles/
+Allow: /kestel/
+Allow: /mudanya/
+Allow: /mustafakemalpasa/
+Allow: /orhaneli/
+Allow: /orhangazi/
+Allow: /yenisehir/
+
+# Statik kaynaklara izin ver (SEO için kritik)
+Allow: /img/
+Allow: /css/
+Allow: /js/
+Allow: /fonts/
+
+# XML Site Haritaları (Sitemap)
+Sitemap: https://www.bursaeskort-vip.vercel.app/sitemap_index.xml
+Sitemap: https://www.bursaeskort-vip.vercel.app/sitemap-ilceler.xml
+Sitemap: https://www.bursaeskort-vip.vercel.app/sitemap-pages.xml

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html amp lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- SEO: Meta description ve keywords -->
+    <meta name="description" content="<%= district.name %> - <%= currentDistrict.charAt(0).toUpperCase() + currentDistrict.slice(1) %> eskort hizmetleri. Güvenilir ve kaliteli hizmet için hemen iletişime geçin.">
+    <meta name="keywords" content="<%= currentDistrict %>, eskort, <%= district.name %>, bursa eskort, hizmet">
+    <meta name="robots" content="index, follow">
+    <!-- SEO: Open Graph ve Twitter Card -->
+    <meta property="og:title" content="<%= district.name %> - <%= currentDistrict.charAt(0).toUpperCase() + currentDistrict.slice(1) %> Eskort">
+    <meta property="og:description" content="Bursa <%= currentDistrict %> bölgesinde eskort hizmetleri. <%= district.name %> ile iletişime geçin.">
+    <meta property="og:image" content="<%= district.images[0] %>">
+    <meta property="og:url" content="https://yourwebsite.com/<%= currentDistrict %>/<%= district.order %>">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/png" href="/img/logo.png">
+
+    <meta name="twitter:title" content="<%= district.name %> - <%= currentDistrict.charAt(0).toUpperCase() + currentDistrict.slice(1) %> Eskort">
+    <meta name="twitter:description" content="Bursa <%= currentDistrict %> eskort hizmetleri.">
+    <meta name="twitter:image" content="<%= district.images[0] %>">
+    <title><%= district.name %> - <%= currentDistrict.charAt(0).toUpperCase() + currentDistrict.slice(1) %> Eskort</title>
+    <link rel="canonical" href="https://yourwebsite.com/<%= currentDistrict %>/<%= district.order %>">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+    <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+    <!-- SEO: JSON-LD structured data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "<%= district.name %> Eskort",
+            "telephone": "<%= district.number %>",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "<%= currentDistrict %>",
+                "addressRegion": "Bursa",
+                "addressCountry": "TR"
+            },
+            "image": "<%= district.images[0] %>",
+            "url": "https://yourwebsite.com/<%= currentDistrict %>/<%= district.order %>"
+        }
+    </script>
+    <style amp-boilerplate>
+        body {
+            -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            animation: -amp-start 8s steps(1, end) 0s 1 normal both
+        }
+        @-webkit-keyframes -amp-start {
+            from { visibility: hidden }
+            to { visibility: visible }
+        }
+        @-moz-keyframes -amp-start {
+            from { visibility: hidden }
+            to { visibility: visible }
+        }
+        @-ms-keyframes -amp-start {
+            from { visibility: hidden }
+            to { visibility: visible }
+        }
+        @-o-keyframes -amp-start {
+            from { visibility: hidden }
+            to { visibility: visible }
+        }
+        @keyframes -amp-start {
+            from { visibility: hidden }
+            to { visibility: visible }
+        }
+    </style>
+    <noscript>
+        <style amp-boilerplate>
+            body {
+                -webkit-animation: none;
+                -moz-animation: none;
+                -ms-animation: none;
+                animation: none
+            }
+        </style>
+    </noscript>
+    <style amp-custom>
+        :root {
+            --primary-color: #6e0073;
+            --secondary-color: #0a9396;
+            --text-light: #ffffff;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+        header {
+            background: linear-gradient(135deg, #6e0073 0%, #0a9396 100%);
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        header .logo {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+        }
+        header .menu-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        header .menu-icon span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: white;
+            margin: 3px 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        amp-sidebar {
+            background-color: #003845;
+            width: 80%;
+            max-width: 300px;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            background: linear-gradient(135deg, #6e0073 0%, #0a9396 100%);
+            padding: 20px 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .sidebar-header h2 {
+            margin: 0;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+        .sidebar-footer {
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        amp-sidebar a {
+            display: block;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+        amp-sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding-left: 25px;
+        }
+        amp-sidebar a:first-child {
+            background-color: rgba(255, 255, 255, 0.15);
+            font-weight: bold;
+        }
+        .district-detail {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        /* Carousel stilleri */
+        amp-carousel#district-carousel {
+            width: 100%;
+            height: 250px;
+            background: #f8f9fa;
+        }
+        amp-carousel#district-carousel amp-img {
+            object-fit: contain;
+            object-position: center;
+            background: transparent;
+            loading: lazy;
+        }
+        /* Lightbox stilleri */
+        amp-lightbox {
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        amp-lightbox .lightbox-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        amp-lightbox amp-img {
+            object-fit: contain;
+            object-position: center;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .details {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .details h2 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        .details p {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .whatsapp-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1DA851;
+        }
+        .features {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .features h3 {
+            font-size: 16px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .features p {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin: 20px auto;
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            max-width: 200px;
+        }
+        .back-link:hover {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+        }
+        .suggestions-section {
+            padding: 20px 8px;
+            background-color: #f8f9fa;
+        }
+        /* Suggestions: Orijinal CSS geri getirildi, sadece resim boyutu büyütüldü */
+        .suggestions-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .card amp-img {
+            width: 100%;
+            height: 150px; /* Resim boyutu büyütüldü (orijinal: 130px) */
+            object-fit: cover;
+            object-position: center;
+            loading: lazy;
+        }
+        .card .info {
+            padding: 5px 3px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .card h3 {
+            margin: 0;
+            font-size: 11px;
+            color: #6e0073;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .card p {
+            margin: 2px 0 0;
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+            line-height: 1.1;
+        }
+        footer {
+            background: linear-gradient(135deg, #6e0073 0%, #0a9396 100%);
+            color: var(--text-light);
+            padding: 20px 15px;
+            margin-top: 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .footer-section {
+            text-align: left;
+        }
+        .footer-section h4 {
+            font-size: 16px;
+            margin: 0 0 10px;
+            font-weight: bold;
+        }
+        .footer-section p {
+            font-size: 13px;
+            margin: 5px 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            text-align: left;
+        }
+        .footer-column {
+            flex: 1;
+        }
+        .footer-column h4 {
+            font-size: 16px;
+            margin: 0 0 10px;
+            font-weight: bold;
+        }
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-column ul li {
+            margin: 4px 0;
+        }
+        .footer-column ul li a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 11px;
+            transition: color 0.2s ease;
+        }
+        .footer-column ul li a:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 15px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        /* Mobil uyumluluk */
+        @media (max-width: 767px) {
+            .district-detail { margin: 10px; padding: 10px; }
+            amp-carousel#district-carousel { height: 200px; }
+            amp-carousel#district-carousel amp-img { height: 200px; }
+            .details h2 { font-size: 18px; }
+            .details p, .features p { font-size: 13px; }
+            .whatsapp-btn { padding: 8px 16px; font-size: 13px; }
+            /* Suggestions: Orijinal mobil CSS */
+            .suggestions-content { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .card amp-img { height: 120px; } /* Resim boyutu büyütüldü (orijinal: 100px) */
+            .card h3 { font-size: 10px; }
+            .card p { font-size: 8px; }
+            .footer-content { grid-template-columns: 1fr; gap: 20px; }
+            amp-lightbox .lightbox-content { padding: 10px; }
+        }
+        @media (min-width: 768px) {
+            /* Suggestions: Orijinal CSS */
+            .suggestions-content { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+            .card amp-img { height: 170px; } /* Resim boyutu büyütüldü (orijinal: 150px) */
+            .card h3 { font-size: 13px; }
+            .card p { font-size: 10px; }
+        }
+        @media (min-width: 1024px) {
+            /* Suggestions: Orijinal CSS */
+            .suggestions-content { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+            .card amp-img { height: 190px; } /* Resim boyutu büyütüldü (orijinal: 170px) */
+            .card h3 { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="menu-icon" on="tap:sidebar.toggle" role="button" tabindex="0">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="logo">
+            <a style="text-decoration: none; color: #f8f9fa;" href="/<%= currentDistrict %>">
+                <amp-img src="/img/logo.png" alt=" Eskort Logo"
+                width="30" height="30" layout="fixed"></amp-img>
+                                <h1 style="font-size: 14px; margin: 0;"><%= currentDistrict.toUpperCase() %> ESKORT</h1>
+            </a>
+        </div>
+        <div class="menu-icon" style="visibility: hidden;">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </header>
+
+    <amp-sidebar id="sidebar" layout="nodisplay" side="left">
+        <div class="sidebar-header">
+            <h2>Bursa Eskort</h2>
+        </div>
+        <div class="sidebar-content">
+            <a href="/">Ana Sayfa</a>
+            <a href="/buyukorhan">Büyükorhan Eskort</a>
+            <a href="/gemlik">Gemlik Eskort</a>
+            <a href="/gursu">Gürsu Eskort</a>
+            <a href="/harmancik">Harmancık Eskort</a>
+            <a href="/inegol">İnegöl Eskort</a>
+            <a href="/iznik">İznik Eskort</a>
+            <a href="/karacabey">Karacabey Eskort</a>
+            <a href="/keles">Keles Eskort</a>
+            <a href="/kestel">Kestel Eskort</a>
+            <a href="/mudanya">Mudanya Eskort</a>
+            <a href="/mustafakemalpasa">Mustafakemalpaşa Eskort</a>
+            <a href="/nilufer">Nilüfer Eskort</a>
+            <a href="/orhaneli">Orhaneli Eskort</a>
+            <a href="/orhangazi">Orhangazi Eskort</a>
+            <a href="/osmangazi">Osmangazi Eskort</a>
+            <a href="/yenisehir">Yenişehir Eskort</a>
+            <a href="/yildirim">Yıldırım Eskort</a>
+        </div>
+        <div class="sidebar-footer">
+            © 2025 Bursa Eskort
+        </div>
+    </amp-sidebar>
+
+    <div class="district-detail">
+        <!-- Carousel: Önceki optimizasyonlar korundu -->
+        <amp-carousel id="district-carousel" width="600" height="250" layout="responsive" type="slides" autoplay delay="3000" loop>
+            <% district.images.forEach((img, index) => { %>
+                <amp-img src="<%= img %>" width="600" height="250" layout="responsive" alt="<%= district.name %> Görsel <%= index + 1 %>" loading="lazy" object-fit="contain" object-position="center"></amp-img>
+            <% }) %>
+        </amp-carousel>
+
+        <!-- Lightbox: Önceki optimizasyonlar korundu -->
+        <% district.images.forEach((img, index) => { %>
+            <amp-lightbox id="lightbox-<%= index %>" layout="nodisplay" scrollable>
+                <div class="lightbox-content" style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">
+                    <amp-img src="<%= img %>" layout="fill" object-fit="contain" alt="<%= district.name %> Görsel <%= index + 1 %>" loading="lazy"></amp-img>
+                    <button on="tap:lightbox-<%= index %>.close" style="position: absolute; top: 15px; right: 15px; padding: 8px 12px; background: rgba(255, 255, 255, 0.9); border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Kapat</button>
+                </div>
+            </amp-lightbox>
+        <% }) %>
+
+        <div class="details">
+            <h2><%= district.name %></h2>
+            <% if (district.isFilled) { %>
+                <p><%= district.number %></p>
+                <a href="https://wa.me/<%= district.number.replace(/\D/g, '') %>" class="whatsapp-btn" target="_blank" rel="noopener">WhatsApp ile İletişime Geçin</a>
+            <% } else { %>
+                <p><%= district.description %></p>
+            <% } %>
+        </div>
+
+        <% if (district.isFilled) { %>
+            <div class="features">
+                <h3>Özellikler</h3>
+                <p><strong>Başlık:</strong> <%= district.name %></p>
+                <p><strong>Yaş:</strong> <%= district.age %></p>
+                <p><strong>Adres:</strong> <%= district.address %></p>
+                <p><strong>Telefon Numarası:</strong> <%= district.number %></p>
+                <p><strong>Açıklama:</strong> <%= district.description %></p>
+            </div>
+        <% } %>
+    </div>
+    <a href="/<%= currentDistrict %>" class="back-link">Geri Dön</a>
+
+    <div class="suggestions-section">
+        <h2 style="text-align: center; color: var(--primary-color); margin: 20px 0;">İlginizi Çekebilecek İlanlar</h2>
+        <div class="suggestions-content">
+            <% if (suggestions.length > 0) { %>
+                <% suggestions.forEach(suggestion => { %>
+                    <div class="card filled" on="tap:AMP.navigateTo(url='/<%= currentDistrict %>/<%= suggestion.order %>')" role="button" tabindex="0">
+                        <amp-img src="<%= suggestion.img %>" alt="<%= suggestion.name %> Görsel" width="300" height="200" layout="responsive" loading="lazy"></amp-img>
+                        <div class="info">
+                            <h3><%= suggestion.name %></h3>
+                            <p><%= suggestion.age %></p>
+                            <p><%= suggestion.number %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p style="text-align: center; color: #666; font-size: 14px;">Henüz ilan yok</p>
+            <% } %>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Bursa Eskort</h4>
+                <p>Bursa'nın tüm ilçelerinde hizmetinizdeyiz.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Hızlı Bağlantılar</h4>
+                    <ul>
+                        <li><a href="/">Ana Sayfa</a></li>
+                        <li><a href="/buyukorhan">Büyükorhan Eskort</a></li>
+                        <li><a href="/gemlik">Gemlik Eskort</a></li>
+                        <li><a href="/gursu">Gürsu Eskort</a></li>
+                        <li><a href="/harmancik">Harmancık Eskort</a></li>
+                        <li><a href="/inegol">İnegöl Eskort</a></li>
+                        <li><a href="/iznik">İznik Eskort</a></li>
+                        <li><a href="/karacabey">Karacabey Eskort</a></li>
+                        <li><a href="/keles">Keles Eskort</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4> </h4>
+                    <ul>
+                        <li><a href="/kestel">Kestel Eskort</a></li>
+                        <li><a href="/mudanya">Mudanya Eskort</a></li>
+                        <li><a href="/mustafakemalpasa">Mustafakemalpaşa Eskort</a></li>
+                        <li><a href="/nilufer">Nilüfer Eskort</a></li>
+                        <li><a href="/orhaneli">Orhaneli Eskort</a></li>
+                        <li><a href="/orhangazi">Orhangazi Eskort</a></li>
+                        <li><a href="/osmangazi">Osmangazi Eskort</a></li>
+                        <li><a href="/yenisehir">Yenişehir Eskort</a></li>
+                        <li><a href="/yildirim">Yıldırım Eskort</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>İletişim</h4>
+                <p>E-posta: <a href="mailto:info@bursaeskort.com" style="color: rgba(255, 255, 255, 0.9);">info@bursaeskort.com</a></p>
+                <p>Telefon: <a href="tel:+905551234567" style="color: rgba(255, 255, 255, 0.9);">+90 555 123 45 67</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Bursa Eskort - Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+</body>
+</html>

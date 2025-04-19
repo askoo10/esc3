@@ -1,0 +1,53 @@
+{
+  "admins": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "ea85245f3a4bcb5fb37119f948f5aeb422fb42a5d0f6536a1182fb66768b436dd4cc34a33c34b9f61a64f0869f05ee70f0177e1449b2f4d39ada9efefdeb6948",
+      "full_name": "jordi reis",
+      "last_login": "2025-04-17T15:41:45.720Z"
+    }
+  ],
+  "districts": {
+    "buyukorhan": [
+      {
+        "baslik": "merve",
+        "telefon_no": "05565656262",
+        "kapak_resim": "/img/1744904566063-8023207.png",
+        "adres": "görükle",
+        "normal_resimler": "/img/1744904566070-556841594.png",
+        "aciklama": "ben seni seviyorum",
+        "yas": "18",
+        "sayfa_sira_no": 5,
+        "ilce_adi": "buyukorhan"
+      },
+      {
+        "baslik": "buse",
+        "telefon_no": "+90546 589 7845",
+        "kapak_resim": "/img/1744905512616-153774461.jpg",
+        "adres": "büyük orhan ",
+        "normal_resimler": "/img/1744905512618-539044872.jpg,/img/1744905512620-453583462.jpg,/img/1744905512621-53997628.jpg,/img/1744905512622-163553752.jpg,/img/1744905512623-991535646.jpg",
+        "aciklama": "ali bana ",
+        "yas": "24",
+        "sayfa_sira_no": 2,
+        "ilce_adi": "buyukorhan"
+      }
+    ],
+    "gemlik": [],
+    "gursu": [],
+    "harmancik": [],
+    "inegol": [],
+    "iznik": [],
+    "karacabey": [],
+    "keles": [],
+    "kestel": [],
+    "mudanya": [],
+    "mustafakemalpasa": [],
+    "nilufer": [],
+    "orhaneli": [],
+    "orhangazi": [],
+    "osmangazi": [],
+    "yenisehir": [],
+    "yildirim": []
+  }
+}

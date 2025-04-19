@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/jordi", "dest": "/server.js" },
+    { "src": "/login", "dest": "/server.js", "methods": ["POST"] },
+    { "src": "/logout", "dest": "/server.js" },
+    { "src": "/admin-index", "dest": "/server.js" },
+    { "src": "/admin/add-district", "dest": "/server.js", "methods": ["GET", "POST"] },
+    { "src": "/admin/list-districts", "dest": "/server.js" },
+    { "src": "/admin/edit-district/(?<district>[^/]+)/(?<id>[^/]+)", "dest": "/server.js", "methods": ["GET", "POST"] },
+    { "src": "/admin/delete-district/(?<district>[^/]+)/(?<id>[^/]+)", "dest": "/server.js", "methods": ["POST"] },
+    { "src": "/sitemap", "dest": "/server.js" },
+    { "src": "/img/(.*)", "dest": "/server.js" },
+    {
+      "src": "/(?<district>buyukorhan|gemlik|gursu|harmancik|inegol|iznik|karacabey|keles|kestel|mudanya|mustafakemalpasa|nilufer|orhaneli|orhangazi|osmangazi|yenisehir|yildirim)(?:/([0-9]+))?",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(lumila|bahar|leyla|burcu|gozde|ilayda|fatma|hatice|derya|hilal|beste|suzan|cansu|eda|yaren|sude|aybuke|ezgi|damla|melek|havin|serenay|kubra|esra|elif|zeynep|asel|asya|defne|nehir|azra|zumra|eylul|ecrin|meryem|lina|eslem|masal|ebrar|elisa|ela|alya|zehra|miray|duru|hiranur|buglem|ada|yagmur|esila|ikra|oyku|gokce|aleda|pamira|lema|lila)",
+      "dest": "/server.js"
+    },
+    { "src": "/", "dest": "/server.js" },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
