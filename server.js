@@ -5,15 +5,14 @@ const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
 const fs = require("fs").promises;
+const { get, put } = require("@vercel/blob");
 
 const app = express();
 
-// Middleware ayarları
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Static dosya sunucusu
 app.use(
   "/img",
   express.static(path.join(__dirname, "views", "img"), {
@@ -21,39 +20,42 @@ app.use(
   })
 );
 
-// EJS ayarları
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// JSON dosyası ayarları
-const dbPath = path.join(__dirname, "data", "database.json");
+const blobName = "database.json";
 
-// JSON dosyasını okuma
 async function readDB() {
   try {
-    const data = await fs.readFile(dbPath, "utf8");
-    return JSON.parse(data);
+    const { downloadUrl } = await get(blobName);
+    if (!downloadUrl) {
+      return { admins: [], districts: {} };
+    }
+    const response = await fetch(downloadUrl);
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error("Dosya okuma hatası:", error);
+    console.error("Blob read error:", error);
     return { admins: [], districts: {} };
   }
 }
 
-// JSON dosyasına yazma
 async function writeDB(data) {
   try {
-    await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+    await put(blobName, JSON.stringify(data, null, 2), {
+      access: "public",
+      token: process.env.VERCEL_BLOB_TOKEN,
+    });
   } catch (error) {
-    console.error("Dosya yazma hatası:", error);
+    console.error("Blob write error:", error);
+    throw error;
   }
 }
 
-// SHA512 şifreleme fonksiyonu
 function sha512(password) {
   return crypto.createHash("sha512").update(password).digest("hex");
 }
 
-// Multer ayarları
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, "views", "img"));
@@ -82,7 +84,6 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// Login işlemi
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -99,11 +100,8 @@ app.post("/login", async (req, res) => {
   );
 
   if (admin) {
-    // Son giriş zamanını güncelle
     admin.last_login = new Date().toISOString();
     await writeDB(db);
-
-    // Doğru girişte admin-index sayfasına yönlendir
     return res.redirect("/admin-index");
   } else {
     return res.render("admin-login", {
@@ -112,7 +110,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Admin paneli ana sayfası
 app.get("/admin-index", (req, res) => {
   res.render("admin-index", {
     success: req.query.success || null,
@@ -120,19 +117,16 @@ app.get("/admin-index", (req, res) => {
   });
 });
 
-// Admin giriş sayfası
 app.get("/jordi", (req, res) => {
   res.render("admin-login", { error: null });
 });
 
-// Basit route'lar için fonksiyon
 const createSimpleRoute = (routeName) => {
   app.get(`/${routeName}`, (req, res) => {
     res.render(routeName, { error: null });
   });
 };
 
-// Tüm basit sayfalar
 const simplePages = [
   "lumila", "bahar", "leyla", "burcu", "gozde", "ilayda", "fatma",
   "hatice", "derya", "hilal", "beste", "suzan", "cansu", "eda",
@@ -146,14 +140,12 @@ const simplePages = [
 
 simplePages.forEach((page) => createSimpleRoute(page));
 
-// Tüm ilçeler
 const districts = [
   "buyukorhan", "gemlik", "gursu", "harmancik", "inegol", "iznik", "karacabey",
   "keles", "kestel", "mudanya", "mustafakemalpasa", "nilufer", "orhaneli",
   "orhangazi", "osmangazi", "yenisehir", "yildirim",
 ];
 
-// İlçe listesi route'u oluşturma
 const createDistrictListRoute = (districtName) => {
   app.get(`/${districtName}`, async (req, res) => {
     const db = await readDB();
@@ -194,7 +186,6 @@ const createDistrictListRoute = (districtName) => {
   });
 };
 
-// İlçe detay route'u oluşturma
 const createDistrictDetailRoute = (districtName) => {
   app.get(`/${districtName}/:id`, async (req, res) => {
     const id = parseInt(req.params.id);
@@ -235,7 +226,6 @@ const createDistrictDetailRoute = (districtName) => {
       };
     }
 
-    // Rastgele öneriler
     const suggestions = districtData
       .filter((row) => row.sayfa_sira_no !== id)
       .sort(() => Math.random() - 0.5)
@@ -263,7 +253,6 @@ districts.forEach((district) => {
   createDistrictDetailRoute(district);
 });
 
-// Ana sayfa
 app.get("/", (req, res) => {
   res.render("index", { error: null });
 });
@@ -271,9 +260,6 @@ app.get("/sitemap", (req, res) => {
   res.render("sitemap", { error: null });
 });
 
-// Admin paneli için ilan yönetimi
-
-// 1. İlan Ekleme Sayfası
 app.get("/admin/add-district", (req, res) => {
   res.render("add-district", {
     districts,
@@ -281,7 +267,6 @@ app.get("/admin/add-district", (req, res) => {
   });
 });
 
-// 2. İlan Ekleme İşlemi
 app.post(
   "/admin/add-district",
   upload.fields([
@@ -319,7 +304,6 @@ app.post(
     const db = await readDB();
     if (!db.districts[district]) db.districts[district] = [];
 
-    // Aynı sayfa_sira_no ile başka bir kayıt varsa hata döndür
     const existing = db.districts[district].find(
       (item) => item.sayfa_sira_no === parseInt(sayfa_sira_no)
     );
@@ -342,12 +326,18 @@ app.post(
       ilce_adi: ilce_adi || district,
     });
 
-    await writeDB(db);
-    res.redirect("/admin-index?success=İlan başarıyla eklendi");
+    try {
+      await writeDB(db);
+      res.redirect("/admin-index?success=İlan başarıyla eklendi");
+    } catch (error) {
+      res.render("add-district", {
+        districts,
+        error: "İlan eklenirken hata oluştu",
+      });
+    }
   }
 );
 
-// 3. İlan Listeleme
 app.get("/admin/list-districts", async (req, res) => {
   const { district } = req.query;
   const selectedDistrict = district || "buyukorhan";
@@ -363,7 +353,6 @@ app.get("/admin/list-districts", async (req, res) => {
   });
 });
 
-// 4. İlan Güncelleme Sayfası
 app.get("/admin/edit-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
   const db = await readDB();
@@ -383,7 +372,6 @@ app.get("/admin/edit-district/:district/:id", async (req, res) => {
   });
 });
 
-// 5. İlan Güncelleme İşlemi
 app.post(
   "/admin/edit-district/:district/:id",
   upload.fields([
@@ -422,7 +410,6 @@ app.post(
       );
     }
 
-    // Aynı sayfa_sira_no başka bir kayıtla çakışıyorsa hata
     if (
       parseInt(sayfa_sira_no) !== parseInt(id) &&
       db.districts[district].some(
@@ -446,12 +433,17 @@ app.post(
       ilce_adi: ilce_adi || district,
     };
 
-    await writeDB(db);
-    res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi");
+    try {
+      await writeDB(db);
+      res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi");
+    } catch (error) {
+      res.redirect(
+        `/admin/edit-district/${district}/${id}?error=İlan güncellenirken hata oluştu`
+      );
+    }
   }
 );
 
-// 6. İlan Silme
 app.post("/admin/delete-district/:district/:id", async (req, res) => {
   const { district, id } = req.params;
   const db = await readDB();
@@ -464,11 +456,15 @@ app.post("/admin/delete-district/:district/:id", async (req, res) => {
     (item) => item.sayfa_sira_no !== parseInt(id)
   );
 
-  await writeDB(db);
-  res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
+  try {
+    await writeDB(db);
+    res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.redirect("/admin/list-districts?error=İlan silinirken hata oluştu");
+  }
 });
 
-// 404 Hata Yönlendirmesi
 app.use((req, res, next) => {
   res.status(404).render("404", {
     error: "Sayfa Bulunamadı",
@@ -476,7 +472,6 @@ app.use((req, res, next) => {
   });
 });
 
-// Hata yönetimi
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).render("error", {
