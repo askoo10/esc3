@@ -5,6 +5,7 @@ const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
 const fs = require("fs").promises;
+const os = require("os");
 
 const app = express();
 
@@ -25,8 +26,10 @@ app.use(
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// JSON dosyası ayarları
-const dbPath = path.join(__dirname, "data", "database.json");
+// Veritabanı dosya yolu - Vercel uyumlu
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? path.join(os.tmpdir(), "database.json")
+  : path.join(__dirname, "data", "database.json");
 
 // JSON dosyasını okuma
 async function readDB() {
@@ -35,16 +38,24 @@ async function readDB() {
     return JSON.parse(data);
   } catch (error) {
     console.error("Dosya okuma hatası:", error);
-    return { admins: [], districts: {} };
+    // Vercel'de dosya yoksa boş bir veritabanı oluştur
+    return { admins: [], districts: {
+      "buyukorhan": [], "gemlik": [], "gursu": [], "harmancik": [], "inegol": [], 
+      "iznik": [], "karacabey": [], "keles": [], "kestel": [], "mudanya": [], 
+      "mustafakemalpasa": [], "nilufer": [], "orhaneli": [], "orhangazi": [], 
+      "osmangazi": [], "yenisehir": [], "yildirim": []
+    }};
   }
 }
 
-// JSON dosyasına yazma
+// JSON dosyasına yazma (Vercel uyumlu)
 async function writeDB(data) {
   try {
     await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+    console.log("Veritabanı başarıyla güncellendi:", dbPath);
   } catch (error) {
     console.error("Dosya yazma hatası:", error);
+    throw error;
   }
 }
 
@@ -53,16 +64,24 @@ function sha512(password) {
   return crypto.createHash("sha512").update(password).digest("hex");
 }
 
-// Multer ayarları
+// Multer ayarları (Vercel uyumlu)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "views", "img"));
+    const destPath = process.env.NODE_ENV === 'production'
+      ? path.join(os.tmpdir(), "img")
+      : path.join(__dirname, "views", "img");
+    
+    // Dizin yoksa oluştur
+    fs.mkdir(destPath, { recursive: true })
+      .then(() => cb(null, destPath))
+      .catch(err => cb(err));
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
+
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -464,8 +483,13 @@ app.post("/admin/delete-district/:district/:id", async (req, res) => {
     (item) => item.sayfa_sira_no !== parseInt(id)
   );
 
-  await writeDB(db);
-  res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
+  try {
+    await writeDB(db);
+    res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
+  } catch (error) {
+    console.error("Silme hatası:", error);
+    res.redirect("/admin/list-districts?error=İlan silinirken bir hata oluştu");
+  }
 });
 
 // 404 Hata Yönlendirmesi
@@ -487,4 +511,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Sunucu ${PORT} portunda çalışıyor.`);
+  console.log(`Veritabanı dosya yolu: ${dbPath}`);
 });
