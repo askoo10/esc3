@@ -5,7 +5,6 @@ const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
 const fs = require("fs").promises;
-const { put } = require("@vercel/blob");
 
 const app = express();
 
@@ -14,25 +13,25 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Static dosya sunucusu
+app.use(
+  "/img",
+  express.static(path.join(__dirname, "views", "img"), {
+    fallthrough: true,
+  })
+);
+
 // EJS ayarları
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // JSON dosyası ayarları
-const dbPath = process.env.NODE_ENV === "production" ? path.join("/tmp", "database.json") : path.join(__dirname, "data", "database.json");
-const staticDbPath = path.join(__dirname, "data", "database.json"); // Read-only source for initial data
+const dbPath = path.join(__dirname, "data", "database.json");
 
 // JSON dosyasını okuma
 async function readDB() {
   try {
-    // Try reading from /tmp/database.json first
-    let data;
-    try {
-      data = await fs.readFile(dbPath, "utf8");
-    } catch (tmpError) {
-      // If /tmp/database.json doesn't exist, fall back to static data/database.json
-      data = await fs.readFile(staticDbPath, "utf8");
-    }
+    const data = await fs.readFile(dbPath, "utf8");
     return JSON.parse(data);
   } catch (error) {
     console.error("Dosya okuma hatası:", error);
@@ -40,11 +39,10 @@ async function readDB() {
   }
 }
 
-// JSON dosyasına yazma (sadece /tmp'ye yazar, kalıcı değil)
+// JSON dosyasına yazma
 async function writeDB(data) {
   try {
     await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
-    console.warn("Warning: Changes written to /tmp/database.json are temporary and will not persist on Vercel.");
   } catch (error) {
     console.error("Dosya yazma hatası:", error);
   }
@@ -55,8 +53,16 @@ function sha512(password) {
   return crypto.createHash("sha512").update(password).digest("hex");
 }
 
-// Multer ayarları (dosyaları bellekte tutar, Vercel Blob'a yüklenir)
-const storage = multer.memoryStorage();
+// Multer ayarları
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "views", "img"));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -155,7 +161,7 @@ const createDistrictListRoute = (districtName) => {
 
     const maxSlots = 50;
     const districtsList = [];
-    const defaultImage = "https://via.placeholder.com/150"; // Varsayılan resim URL'si
+    const defaultImage = "/img/default.jpg";
 
     for (let i = 1; i <= maxSlots; i++) {
       const district = districtData.find((row) => row.sayfa_sira_no === i);
@@ -194,7 +200,7 @@ const createDistrictDetailRoute = (districtName) => {
     const id = parseInt(req.params.id);
     const db = await readDB();
     const districtData = db.districts[districtName] || [];
-    const defaultImage = "https://via.placeholder.com/150";
+    const defaultImage = "/img/default.jpg";
 
     const district = districtData.find((row) => row.sayfa_sira_no === id);
     let districtDetail;
@@ -301,27 +307,14 @@ app.post(
       });
     }
 
-    let kapakResim = null;
-    if (req.files["kapak_resim"]) {
-      const file = req.files["kapak_resim"][0];
-      const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
-        access: "public",
-      });
-      kapakResim = blob.url;
-    }
-
-    let normalResimler = null;
-    if (req.files["normal_resimler"]) {
-      const urls = await Promise.all(
-        req.files["normal_resimler"].map(async (file) => {
-          const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
-            access: "public",
-          });
-          return blob.url;
-        })
-      );
-      normalResimler = urls.join(",");
-    }
+    const kapakResim = req.files["kapak_resim"]
+      ? `/img/${req.files["kapak_resim"][0].filename}`
+      : null;
+    const normalResimler = req.files["normal_resimler"]
+      ? req.files["normal_resimler"]
+          .map((file) => `/img/${file.filename}`)
+          .join(",")
+      : null;
 
     const db = await readDB();
     if (!db.districts[district]) db.districts[district] = [];
@@ -350,7 +343,7 @@ app.post(
     });
 
     await writeDB(db);
-    res.redirect("/admin-index?success=İlan başarıyla eklendi (Geçici olarak kaydedildi, kalıcı olması için data/database.json dosyasını güncelleyin ve yeniden deploy edin)");
+    res.redirect("/admin-index?success=İlan başarıyla eklendi");
   }
 );
 
@@ -409,27 +402,14 @@ app.post(
       ilce_adi,
     } = req.body;
 
-    let kapakResim = req.body.existing_kapak_resim;
-    if (req.files["kapak_resim"]) {
-      const file = req.files["kapak_resim"][0];
-      const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
-        access: "public",
-      });
-      kapakResim = blob.url;
-    }
-
-    let normalResimler = req.body.existing_normal_resimler;
-    if (req.files["normal_resimler"]) {
-      const urls = await Promise.all(
-        req.files["normal_resimler"].map(async (file) => {
-          const blob = await put(`img/${Date.now()}-${file.originalname}`, file.buffer, {
-            access: "public",
-          });
-          return blob.url;
-        })
-      );
-      normalResimler = urls.join(",");
-    }
+    const kapakResim = req.files["kapak_resim"]
+      ? `/img/${req.files["kapak_resim"][0].filename}`
+      : req.body.existing_kapak_resim;
+    const normalResimler = req.files["normal_resimler"]
+      ? req.files["normal_resimler"]
+          .map((file) => `/img/${file.filename}`)
+          .join(",")
+      : req.body.existing_normal_resimler;
 
     const db = await readDB();
     const listingIndex = db.districts[district]?.findIndex(
@@ -467,7 +447,7 @@ app.post(
     };
 
     await writeDB(db);
-    res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi (Geçici olarak kaydedildi, kalıcı olması için data/database.json dosyasını güncelleyin ve yeniden deploy edin)");
+    res.redirect("/admin/list-districts?success=İlan başarıyla güncellendi");
   }
 );
 
@@ -485,7 +465,7 @@ app.post("/admin/delete-district/:district/:id", async (req, res) => {
   );
 
   await writeDB(db);
-  res.redirect("/admin/list-districts?success=İlan başarıyla silindi (Geçici olarak kaydedildi, kalıcı olması için data/database.json dosyasını güncelleyin ve yeniden deploy edin)");
+  res.redirect("/admin/list-districts?success=İlan başarıyla silindi");
 });
 
 // 404 Hata Yönlendirmesi
