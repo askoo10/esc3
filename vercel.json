@@ -6,16 +6,14 @@
   "routes": [
     { "src": "/jordi", "dest": "/server.js" },
     { "src": "/login", "dest": "/server.js", "methods": ["POST"] },
-    { "src": "/logout", "dest": "/server.js" },
     { "src": "/admin-index", "dest": "/server.js" },
     { "src": "/admin/add-district", "dest": "/server.js", "methods": ["GET", "POST"] },
     { "src": "/admin/list-districts", "dest": "/server.js" },
-    { "src": "/admin/edit-district/(?<district>[^/]+)/(?<id>[^/]+)", "dest": "/server.js", "methods": ["GET", "POST"] },
-    { "src": "/admin/delete-district/(?<district>[^/]+)/(?<id>[^/]+)", "dest": "/server.js", "methods": ["POST"] },
+    { "src": "/admin/edit-district/([^/]+)/([^/]+)", "dest": "/server.js", "methods": ["GET", "POST"] },
+    { "src": "/admin/delete-district/([^/]+)/([^/]+)", "dest": "/server.js", "methods": ["POST"] },
     { "src": "/sitemap", "dest": "/server.js" },
-    { "src": "/img/(.*)", "dest": "/server.js" },
     {
-      "src": "/(?<district>buyukorhan|gemlik|gursu|harmancik|inegol|iznik|karacabey|keles|kestel|mudanya|mustafakemalpasa|nilufer|orhaneli|orhangazi|osmangazi|yenisehir|yildirim)(?:/([0-9]+))?",
+      "src": "/(buyukorhan|gemlik|gursu|harmancik|inegol|iznik|karacabey|keles|kestel|mudanya|mustafakemalpasa|nilufer|orhaneli|orhangazi|osmangazi|yenisehir|yildirim)(?:/([0-9]+))?",
       "dest": "/server.js"
     },
     {
