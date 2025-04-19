@@ -9,19 +9,7 @@
     }
   ],
   "districts": {
-    "buyukorhan": [
-      {
-        "baslik": "merve",
-        "telefon_no": "05565656262",
-        "kapak_resim": "/img/1744904566063-8023207.png",
-        "adres": "görükle",
-        "normal_resimler": "/img/1744904566070-556841594.png",
-        "aciklama": "ben seni seviyorum",
-        "yas": "18",
-        "sayfa_sira_no": 5,
-        "ilce_adi": "buyukorhan"
-      }
-    ],
+    "buyukorhan": [],
     "gemlik": [],
     "gursu": [],
     "harmancik": [],
